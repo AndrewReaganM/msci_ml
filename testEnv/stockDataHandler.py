@@ -1,13 +1,18 @@
+"""
+Library for using a pandas dataframe to import stock/etf data from Kaggle.
+
+"""
+
 import os
 import pandas as pd
 
 
 def import_stock_csv(_file_list, verbose=False):
     _dfList = []
-    for file in _file_list:
-        _file_name = os.path.splitext(os.path.basename(file))[0]
+    for _file in _file_list:
+        _file_name = os.path.splitext(os.path.basename(_file))[0]
         try:
-            _dfn = pd.read_csv(file)
+            _dfn = pd.read_csv(_file)
             _objName = _file_name.split('.', 1)[0]
             _dfn['Name'] = _objName
             _dfn.index.name = _file_name
@@ -25,19 +30,20 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dty
     """
     Function to import Stock/ETF data in specific format.
 
+    :rtype: pandas df
     :param _file_list: List of files to be imported.
     :param verify_integrity: bool: whether pandas should verify index integrity or not.
     :param print_sample: int: print a sample of the data (head).
     :param print_dtypes: bool: print dtypes of imported data.
     :param verbose: bool: more verbose printing to console.
-    :return: complate pandas dataframe.
+    :return: complete pandas dataframe.
     """
-    dflist = import_stock_csv(_file_list, verbose=verbose)
+    _dflist = import_stock_csv(_file_list, verbose=verbose)
 
     if verbose:
-        print("Concatenating " + str(len(dflist)) + " dataframes.")
+        print("Concatenating " + str(len(_dflist)) + " dataframes.")
 
-    _dataframe = pd.concat(dflist, axis=0, ignore_index=True)
+    _dataframe = pd.concat(_dflist, axis=0, ignore_index=True)
     if verbose:
         print("Setting up index and verifying index integrity...")
 

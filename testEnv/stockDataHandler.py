@@ -53,7 +53,7 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dty
     # Prints a sampling of data
     if print_sample != 0:
         print("Post-indexing sample:")
-        print(_dataframe.head(5))
+        print(_dataframe.head(print_sample))
 
     if verbose:
         print("Import complete\nLines: " + str(len(_dataframe.index)))

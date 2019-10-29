@@ -22,6 +22,16 @@ def import_stock_csv(_file_list, verbose=False):
 
 
 def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dtypes=False, verbose=False):
+    """
+    Function to import Stock/ETF data in specific format.
+
+    :param _file_list: List of files to be imported.
+    :param verify_integrity: bool: whether pandas should verify index integrity or not.
+    :param print_sample: int: print a sample of the data (head).
+    :param print_dtypes: bool: print dtypes of imported data.
+    :param verbose: bool: more verbose printing to console.
+    :return: complate pandas dataframe.
+    """
     dflist = import_stock_csv(_file_list, verbose=verbose)
 
     if verbose:

@@ -18,4 +18,4 @@ filenames += glob.glob(os.path.join(pathETFs, "*.txt"))  # Create list of ETF fi
 
 # Import stocks and ETFs
 print("Importing Stocks and ETFs from .txt files....")
-new_df = sdh.stock_dataframe(filenames, print_sample=5, print_dtypes=True, verbose=True)
+new_df = sdh.stock_dataframe(filenames, print_sample=20, print_dtypes=True, verbose=True)

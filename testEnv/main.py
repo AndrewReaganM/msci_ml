@@ -7,7 +7,6 @@ import os
 import pandas as pd
 import stockDataHandler as sdh
 
-
 # Path to Stock directory
 pathStocks = "/Users/andrewmassey/Documents/2019 - Fall/SoftwareEng/MSCI/price-volume-data-for-all-us-stocks-etfs" \
              "/Stocks"

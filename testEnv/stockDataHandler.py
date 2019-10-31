@@ -20,8 +20,8 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True):
         _file_name = os.path.splitext(os.path.basename(_file))[0]
         try:
             _dfn = pd.read_csv(_file, engine='c')  # Read in CSV
-            _objName = _file_name.split('.', 1)[0] # Retrieve the stock name
-            _dfn['Name'] = _objName # Add column with stock name
+            _objName = _file_name.split('.', 1)[0]  # Retrieve the stock name
+            _dfn['Name'] = _objName  # Add column with stock name
             _dfn.index.name = _file_name
             _dfn['Date'] = pd.to_datetime(_dfn['Date'])  # Convert Date field to correct data type.
             if date_as_index:
@@ -29,9 +29,9 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True):
             _dfDict[_objName] = _dfn  # Add DF to dictionary
             # print("Imported " + file_name)
         except Exception as e:
-            if verbose: # Print exception
+            if verbose:  # Print exception
                 print(str(e) + ": '" + _file_name + ".txt' File may be blank.")
-    return _dfDict # Return a dictionary of dataframes keyed by ticker.
+    return _dfDict  # Return a dictionary of dataframes keyed by ticker.
 
 
 def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dtypes=False, verbose=False):
@@ -72,12 +72,12 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dty
         print("Data Types:")
         print(_dataframe.dtypes)
 
-    return _dataframe # Return individual dataframe.
+    return _dataframe  # Return individual dataframe.
 
 
 def import_supp_data(_comp_data, verify_integrity=True):
-    _comp_df = pd.read_csv(_comp_data) # Read CSV
-    _comp_df['ticker'] = _comp_df['ticker'].str.lower() # Make ticker lowercase for easier access.
-    _comp_df.set_index(['ticker'], inplace=True, verify_integrity=verify_integrity) # Set ticker as index.
-    _comp_df.columns = [_c.replace(' ', '_') for _c in _comp_df.columns] # Replace spaces with underscores.
-    return _comp_df # Return individual dataframe.
+    _comp_df = pd.read_csv(_comp_data)  # Read CSV
+    _comp_df['ticker'] = _comp_df['ticker'].str.lower()  # Make ticker lowercase for easier access.
+    _comp_df.set_index(['ticker'], inplace=True, verify_integrity=verify_integrity)  # Set ticker as index.
+    _comp_df.columns = [_c.replace(' ', '_') for _c in _comp_df.columns]  # Replace spaces with underscores.
+    return _comp_df  # Return individual dataframe.

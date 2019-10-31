@@ -24,7 +24,7 @@ filenames += glob.glob(os.path.join(pathETFs, stock_file_ext))  # Concatenate th
 
 # Import stocks and ETFs
 print("Importing Stocks and ETFs from .txt files...")
-stock_df = sdh.stock_dataframe(filenames, print_sample=5, print_dtypes=False, verbose=False)
+stock_df = sdh.stock_dataframe(filenames, print_sample=5, print_dtypes=False, verbose=True, sort_index=True)
 
 # Import supplemental data
 print("Importing supplemental company metadata...")

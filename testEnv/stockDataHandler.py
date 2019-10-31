@@ -34,7 +34,7 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True):
     return _dfDict  # Return a dictionary of dataframes keyed by ticker.
 
 
-def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dtypes=False, verbose=False):
+def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dtypes=False, verbose=False, sort_index=False):
     """
     Function to import Stock/ETF data in specific format.
 
@@ -61,9 +61,15 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0, print_dty
     except KeyError as e:
         print("Indexing error" + str(e) + ". Make sure that this column was not an index in the external DF.")
 
-    # Prints a sampling of data
-    if print_sample != 0:
-        print(_dataframe.head(print_sample))
+    # Sorts dataframe by index
+    if sort_index:
+        if verbose:
+            print("Sorting index...")
+        _dataframe.sort_index()
+
+        # Prints a sampling of data
+        if print_sample != 0:
+            print(_dataframe.head(print_sample))
 
     if verbose:
         print("Import complete\nLines: " + str(len(_dataframe.index)))

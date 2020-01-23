@@ -26,6 +26,7 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True):
             _dfn['Date'] = pd.to_datetime(_dfn['Date'])  # Convert Date field to correct data type.
             if date_as_index:
                 _dfn.set_index(['Date'], inplace=True, verify_integrity=True)  # Set date as index if specified
+            _dfn.drop(columns="OpenInt", axis=1, inplace=True) # Drop column with no data.
             _dfDict[_objName] = _dfn  # Add DF to dictionary
             # print("Imported " + file_name)
         except Exception as e:

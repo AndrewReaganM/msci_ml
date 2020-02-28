@@ -12,7 +12,9 @@ Example:
     v_index = msciLib.variable_to_index("Close")
 
 Attributes:
-
+    VARIABLE_MAP (np.array (string)): an array of variables in the order as 
+        they appear in the dataset. This allows for a mapping between variable
+        and its index and vice versa.
 Todo:
     * Look into Symmetric MAPE for calculate MAPE to resolve divide by zero.
 
@@ -20,6 +22,9 @@ Todo:
    http://google.github.io/styleguide/pyguide.html
 
 """
+
+# Global variables
+VARIABLE_MAP = np.array(["open", "high", "low", "close", "volume"]) # constant
 
 def calculate_mape(actual_values, forcasted_values):
     """Calculates the Mean Absolute Percentage Error (MAPE) of two arrays.
@@ -52,6 +57,73 @@ def calculate_mape(actual_values, forcasted_values):
         actual_values[np.where(actual_values == 0)] += 0.000001
     
     return np.sum(np.absolute((actual_values - forcasted_values) / actual_values)) / len(actual_values) * 100
+
+
+def calculate_basecase_mape(matrix, ticker_index, variable):
+    
+    variable_index = variable_to_index(variable)
+    
+    actual_values = matrix[1:, ticker_index * 5 + variable_index]
+    forcasted_values = matrix[0:-1, ticker_index * 5 + variable_index]
+    
+    return calculate_mape(actual_values, forcasted_values)
+
+
+def index_to_variable(index):
+    """Maps a index to its variable value in the matrix. Inverse of 
+        variable_to_index function.
+    
+    0, 1, 2, 3, 4 are mapped to Open, High, Low, Close, Volume respectively.
+
+    Args:
+        index (int): the index of the variable
+
+    Returns:
+        string: the variable
+        
+    Raises:
+        ValueError: if the specified index does not exist in dataset.
+
+    """
+    
+    if index < 0 or index > 4:
+        raise ValueError("index specified does not exist.")
+        
+    return VARIABLE_MAP[index]
+
+
+def variable_to_index(variable):
+    """Maps a variable to its index value in the matrix.
+    
+    Open, High, Low, Close, Volume are mapped to 0, 1, 2, 3, 4 respectively.
+
+    Args:
+        variable (string): the variable
+
+    Returns:
+        int: the index of the variable
+        
+    Raises:
+        ValueError: if the specified variable does not exist in dataset.
+
+    """
+    
+    variable_index = -1
+    
+    if (variable.lower() == "open"):
+        variable_index = 0
+    elif (variable.lower() == "high"):
+        variable_index = 1
+    elif (variable.lower() == "low"):
+        variable_index = 2
+    elif (variable.lower() == "close"):
+        variable_index = 3
+    elif (variable.lower() == "volume"):
+        variable_index = 4
+    else:
+        raise ValueError("variable specified does not exist.")
+        
+    return variable_index
 
 
 def variable_to_index(variable):
@@ -106,7 +178,10 @@ def plot_ticker(matrix, tickers, ticker_index, variable):
 
 
     plt.plot(matrix[:,ticker_index * 5 + variable_index])
-    plt.title("Variable: {}, Ticker: {}".format(variable, tickers[ticker_index]))
+    
+    plt.title("Variable: {}, Ticker: {}, Ticker Index: {}".format(
+        variable, tickers[ticker_index], ticker_index))
+    
     plt.show()
     
     

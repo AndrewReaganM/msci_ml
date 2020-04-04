@@ -54,7 +54,8 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True, impute_vals=
 
 
 def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
-                    print_dtypes=False, verbose=False, sort_index=False, impute_vals=True):
+                    print_dtypes=False, verbose=False, sort_index=False, impute_vals=True,
+                    max_close=0, normalization=True):
     """
     Function to import Stock/ETF data in specific format.
 
@@ -66,6 +67,7 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
     :param print_sample: int: print a sample of the data (head).
     :param print_dtypes: bool: print dtypes of imported data.
     :param verbose: bool: more verbose printing to console.
+    :param max_close: cut all tickers out that have a close that exceeds this value. (0 for no check)
     :return: complete pandas dataframe.
     """
     # date_as_index is false as that needs to be set up in the master dataframe concatenated below.
@@ -93,6 +95,22 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
     # Prints a sampling of data, if requested
     if print_sample != 0:
         print(_dataframe.head(print_sample))
+    if max_close != 0:
+        print("Removing all values over " + str(max_close))
+        # Makes a list of all tickers over the max_close value.
+        unreasonable_vals = _dataframe[_dataframe['Close']>max_close].index.droplevel(level='Date').unique().tolist()
+
+        # Write removed stocks to a file (path based on ROOT_PATH).
+        with open(os.path.dirname(os.path.dirname(os.getcwd())) + '/data/raw/meta/bad_tickers.txt', 'w') as f:
+            for tck in unreasonable_vals:
+                f.write('%s\n' % tck)
+        # A KeyError will be thrown if unreasonable_vals is blank. Catch this exception and move on.
+        try:
+            _dataframe.drop(unreasonable_vals, level='Name', inplace=True)
+        except KeyError as k:
+            if verbose:
+                print("No tickers over max close of " + str(max_close))
+
 
     if verbose:
         print("Import complete\nLines: " + str(len(_dataframe.index)))
@@ -100,10 +118,10 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
     if print_dtypes:  # Optionally print datatypes for verification.
         print("Data Types:")
         print(_dataframe.dtypes)
-
+    
     del _df_list
 
-    return _dataframe  # Return individual dataframe.
+    return _dataframe  # Return master dataframe.
 
 
 def import_supp_data(_comp_data, verify_integrity=True):

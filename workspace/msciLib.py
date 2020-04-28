@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import pandas as pd
+
 
 """MSCI Helper Library (msciLib)
 
@@ -25,6 +28,66 @@ Todo:
 
 # Global variables
 VARIABLE_MAP = np.array(["open", "high", "low", "close", "volume"]) # constant
+
+def select_ticker(tickers, df, chosen_tickers_dict):
+    ticker = np.random.choice(tickers)
+    num_entries = df.query('Name == "{}"'.format(ticker)).shape[0]
+    
+    while ((num_entries < 2500 or num_entries > 4000) or ticker in chosen_tickers_dict):
+        
+        ticker = np.random.choice(tickers)
+        num_entries = df.query('Name == "{}"'.format(ticker)).shape[0]
+        
+    return ticker
+
+def select_random_ticker(tickers, df, chosen_tickers):
+    ticker = np.random.choice(tickers)
+    while (df.query('Name == "{}"'.format(ticker)).shape[0] < 2500 or ticker in chosen_tickers):
+        
+        ticker = np.random.choice(tickers)
+        
+    chosen_tickers.append(ticker)
+        
+    return ticker, chosen_tickers
+
+# TODO(melissa): clean up import.
+def import_3201_stock(_file_list, verbose=False, date_as_index=True):
+    """
+    Function to import .txt file contents into a dictionary of Pandas dataframes.
+
+    :param _file_list: List of stock data file paths.
+    :param verbose: Bool to print errors or not.
+    :return: dictionary of dataframes keyed by ticker.
+    """
+    _dfDict = pd.DataFrame()
+    for i in range(len(_file_list)):
+    # for i in range(200):
+        
+        _file = _file_list[i]
+        
+        _file_name = os.path.splitext(os.path.basename(_file))[0]
+        try:
+            _dfn = pd.read_csv(_file, engine='c')  # Read in CSV
+            _objName = _file_name.split('.', 1)[0]  # Retrieve the stock name
+            _dfn['Name'] = _objName  # Add column with stock name
+            _dfn.index.name = _file_name
+            _dfn['Date'] = pd.to_datetime(_dfn['Date'])  # Convert Date field to correct data type.
+            if date_as_index:
+                _dfn.set_index(['Date'], inplace=True, verify_integrity=True)  # Set date as index if specified
+                
+            my_data = np.genfromtxt(_file, dtype=[('Date','U10'),('Open','f8'),
+                                                       ('High','f8'),('Low','f8'),('Close','f8'),
+                                                      ('Volume','f8'),('OpenInt','f8')],delimiter=',', skip_header = True)
+            if (my_data.size == 3201):
+                #_dfDict[_objName] = my_data  # Add DF to dictionary
+                _dfDict = _dfDict.append(_dfn)   
+            #_dfDict[_objName] = _dfn  # Add DF to dictionary
+            # print("Imported " + file_name)
+        except Exception as e:
+            if verbose:  # Print exception
+                print(str(e) + ": '" + _file_name + ".txt' File may be blank.")
+    return _dfDict  # Return a dictionary of dataframes keyed by ticker.
+
 
 def calculate_mape(actual_values, forcasted_values):
     """Calculates the Mean Absolute Percentage Error (MAPE) of two arrays.
@@ -242,3 +305,30 @@ def construct_train_test_sets(matrix, ticker_index, target_variable, split = 0.5
     
     return train_set, train_target, test_set, test_target
 
+def import_numpy_dict(_file_list, _expected_length, numStart, verbose=False):
+    """
+    Function to import .npy file contents into a dictionary of numpy arrays
+
+    :param _file_list: List of feature importance file paths.
+    :param verbose: Bool to print errors or not.
+    :return: dictionary of numpy arrays keyed by ticker.
+    """
+    _feat_imp_dict = {}
+    for _file in _file_list:
+        _file_name = os.path.splitext(os.path.basename(_file))[0]
+        
+        
+        _np_array = np.load(_file)
+        
+        if (len(_np_array) != _expected_length):
+
+            if (verbose):
+                print("ERROR {}".format(len(_np_array)))
+                print(_file)
+                print("")
+        
+        else:
+            _company_num = _file_name[numStart:]
+            _feat_imp_dict[int(_company_num)] = _np_array
+            
+    return _feat_imp_dict  # Return a dictionary of dataframes keyed by ticker.

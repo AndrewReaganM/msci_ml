@@ -2,6 +2,8 @@
 The objective of this project is to predict data values that are missing from
 a stock dataset using various machine learning techniques.
 
+##### Data Courtesy of borismarjanovic on Kaggle: https://www.kaggle.com/borismarjanovic/price-volume-data-for-all-us-stocks-etfs
+
 ## Project Asset Structure
 The files in this project are organized in the following structure:
 

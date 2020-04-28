@@ -101,6 +101,10 @@ class Embedding:
 
         similar = self._model.wv.most_similar(ticker, topn=count)
         similar = self.__remove_non_tickers(similar)
+
+        if len(similar) < count:
+            similar = self.get_similar(ticker, count*2)
+
         return similar[:count]
 
         #return self._model.wv.most_similar(ticker, topn=count)

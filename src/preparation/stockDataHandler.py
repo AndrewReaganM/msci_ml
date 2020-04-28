@@ -1,5 +1,7 @@
 """
-Library for using a Pandas dataframe to import stock/etf data from Kaggle.
+Library for using a Pandas dataframe to import stock/etf data from Kaggle at:
+
+https://www.kaggle.com/borismarjanovic/price-volume-data-for-all-us-stocks-etfs
 
 """
 
@@ -7,7 +9,7 @@ import os
 import pandas as pd
 
 
-def import_stock_csv(_file_list, verbose=False, date_as_index=True, impute_vals=True):
+def import_stock_csv(_file_list, verbose=False, date_as_index=True, impute_vals=True, log_returns=False):
     """
     Function to import .txt file contents into a dictionary of Pandas dataframes.
 
@@ -15,6 +17,7 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True, impute_vals=
     :param impute_vals: imputes additional data values
     :param _file_list: List of stock data file paths.
     :param verbose: Bool to print errors or not.
+    :param log_returns: whether or not to calculate log returns for each time value.
     :return: dictionary of dataframes keyed by ticker.
     """
     _dfDict = {}
@@ -30,8 +33,9 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True, impute_vals=
                 _dfn.set_index(['Date'], inplace=True, verify_integrity=True)  # Set date as index if specified
 
             _dfn.drop(columns="OpenInt", axis=1, inplace=True)  # Drop column with no data.
+            
+            # Insert imputed values that could help the model.
             if impute_vals:
-                # Insert imputed values that could help the model.
                 _dfn['Close_to_Open'] = (_dfn.Open - _dfn.Close.shift(fill_value=0.0)) / _dfn.Close.shift(
                     fill_value=0.0)
                 _dfn['Close_to_High'] = (_dfn.High - _dfn.Close.shift(fill_value=0.0)) / _dfn.Close.shift(
@@ -41,7 +45,12 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True, impute_vals=
                     fill_value=0.0)
                 _dfn['Volume_Change'] = (_dfn.Volume - _dfn.Volume.shift(fill_value=0.0)) / _dfn.Volume.shift(
                     fill_value=0.0)
-                # Remove the first value for the ticker (invalid imputed value, usually -inf)
+            # Calculate the log returns for all rows.
+            if log_returns:
+                _dfn['log_returns'] = _dfn.Close / _dfn.Close.shift(fill_value=0.0)
+                
+            # Remove the first value for the ticker (invalid imputed value, usually -inf) any values imputed.
+            if impute_vals or log_returns:
                 _dfn.drop([0], inplace=True)
 
             # Add dataframe to dictionary by key
@@ -55,10 +64,11 @@ def import_stock_csv(_file_list, verbose=False, date_as_index=True, impute_vals=
 
 def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
                     print_dtypes=False, verbose=False, sort_index=False, impute_vals=True,
-                    max_close=0, normalization=True):
+                    max_close=0, normalization=True, log_returns=False):
     """
     Function to import Stock/ETF data in specific format.
 
+    :param normalization: flag for whether or not to normalize the pricing data
     :param impute_vals: imputes additional data values
     :param sort_index: Boolean that sorts by multi-index if true
     :rtype: pandas df
@@ -68,10 +78,11 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
     :param print_dtypes: bool: print dtypes of imported data.
     :param verbose: bool: more verbose printing to console.
     :param max_close: cut all tickers out that have a close that exceeds this value. (0 for no check)
+    :param log_returns: whether or not to calculate log returns for all tickers across time.
     :return: complete pandas dataframe.
     """
     # date_as_index is false as that needs to be set up in the master dataframe concatenated below.
-    _df_list = import_stock_csv(_file_list, verbose=verbose, date_as_index=False, impute_vals=impute_vals)
+    _df_list = import_stock_csv(_file_list, verbose=verbose, date_as_index=False, impute_vals=impute_vals, log_returns=log_returns)
 
     if verbose:
         print("Concatenating " + str(len(_df_list)) + " dataframes.")
@@ -92,9 +103,6 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
             print("Sorting index...")
         _dataframe.sort_index()
 
-    # Prints a sampling of data, if requested
-    if print_sample != 0:
-        print(_dataframe.head(print_sample))
     if max_close != 0:
         print("Removing all values over " + str(max_close))
         # Makes a list of all tickers over the max_close value.
@@ -114,8 +122,13 @@ def stock_dataframe(_file_list, verify_integrity=True, print_sample=0,
 
     if verbose:
         print("Import complete\nLines: " + str(len(_dataframe.index)))
-
-    if print_dtypes:  # Optionally print datatypes for verification.
+    
+    # Prints a sampling of data, if requested
+    if print_sample != 0:
+        print(_dataframe.head(print_sample))
+    t
+    # Optionally print datatypes for verification.
+    if print_dtypes:
         print("Data Types:")
         print(_dataframe.dtypes)
     
